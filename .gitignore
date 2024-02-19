@@ -1,0 +1,8 @@
+docs
+test
+static
+
+*.exe
+*.exe~
+
+iot-op
