@@ -7,10 +7,11 @@ import (
 
 func convertAVM(in *models.AVM) *pb.AVM {
 	var rs = &pb.AVM{
-		Id:     in.Id,
-		Signed: in.Signed,
-		Data:   in.Data,
-		Value:  in.Volume.StringFixed(2),
+		Id:        in.Id,
+		Signed:    in.Signed,
+		Data:      in.Data,
+		Value:     in.Volume.StringFixed(2),
+		CreatedAt: in.CreatedAt.Unix(),
 	}
 	return rs
 }
