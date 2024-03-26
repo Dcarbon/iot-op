@@ -181,6 +181,9 @@ func (ip *MintImpl) GetMinted(req *domain.RMinterGetMinted,
 		if group == "" {
 			return nil, gutils.ErrBadRequest("Invalid interval param")
 		}
+		if req.Interval == 2 {
+			group = "month"
+		}
 
 		query = ip.tblMinted().Raw(
 			fmt.Sprintf(
@@ -216,7 +219,7 @@ func (ip *MintImpl) GetMinted(req *domain.RMinterGetMinted,
 	}
 
 	var data = make([]*models.Minted, 0)
-	var err = query.Find(&data).Error
+	var err = query.Debug().Find(&data).Error
 	if nil != err {
 		return nil, dmodels.ParsePostgresError("", err)
 	}
