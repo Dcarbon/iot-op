@@ -11,7 +11,7 @@ func convertAVM(in *models.AVM) *pb.AVM {
 		Signed:    in.Signed,
 		Data:      in.Data,
 		Value:     in.Volume.StringFixed(2),
-		CreatedAt: in.CreatedAt.Unix(),
+		CreatedAt: in.CreatedAt.UnixMilli(),
 	}
 	return rs
 }
@@ -24,8 +24,8 @@ func convertMintedSign(in *models.MintSign,
 		Nonce:     in.Nonce,
 		Amount:    in.Amount,
 		Signed:    in.Signed,
-		CreatedAt: in.CreatedAt.Unix(),
-		UpdatedAt: in.CreatedAt.Unix(),
+		CreatedAt: in.CreatedAt.UnixMilli(),
+		UpdatedAt: in.CreatedAt.UnixMilli(),
 	}
 	return rs
 }
@@ -35,7 +35,7 @@ func convertMinted(in *models.Minted) *pb.IotMinted {
 		Id:        in.Id,
 		IotId:     in.IotId,
 		Carbon:    in.Carbon,
-		CreatedAt: in.CreatedAt.Unix(),
+		CreatedAt: in.CreatedAt.UnixMilli(),
 	}
 	return rs
 }
