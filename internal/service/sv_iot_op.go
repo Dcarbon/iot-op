@@ -152,8 +152,23 @@ func (sv *Service) GetMintSigns(ctx context.Context, req *pb.RIotGetMintSigns,
 
 	return &pb.MintedSigns{
 		Total: 0,
-		Data:  convertArr[models.MintSign, pb.MintedSign](signeds, convertMintedSign),
+		Data:  convertArr(signeds, convertMintedSign),
 	}, nil
+}
+
+func (sv *Service) GetMintSignLatest(ctx context.Context, req *pb.RIotGetMintSignLatest,
+) (*pb.MintedSign, error) {
+	signed, err := sv.iminter.GetSignLatest(&domain.RMinterGetSignLatest{
+		IotId: req.IotId,
+	})
+	if nil != err {
+		return nil, err
+	}
+	if signed.Id == 0 {
+		return nil, gutils.ErrNotFound("Has no sign")
+	}
+
+	return convertMintedSign(signed), nil
 }
 
 func (sv *Service) GetMinted(ctx context.Context, req *pb.RIotGetMinted,
@@ -170,7 +185,7 @@ func (sv *Service) GetMinted(ctx context.Context, req *pb.RIotGetMinted,
 	}
 
 	var rs = &pb.IotMinteds{
-		Data: convertArr[models.Minted, pb.IotMinted](data, convertMinted),
+		Data: convertArr(data, convertMinted),
 	}
 
 	return rs, nil

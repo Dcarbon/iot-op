@@ -150,7 +150,7 @@ func (ip *MintImpl) GetSigns(req *domain.RMinterGetSigns,
 	var signeds = make([]*models.MintSign, 0)
 	var query = ip.tblSign().
 		Where(
-			"updated_at > ? AND updated_at < ? AND  iot = ?",
+			"updated_at > ? AND updated_at < ? AND iot = ?",
 			time.Unix(req.From, 0), time.Unix(req.To, 0), iot.Address,
 		)
 
@@ -168,6 +168,22 @@ func (ip *MintImpl) GetSigns(req *domain.RMinterGetSigns,
 		return nil, dmodels.ParsePostgresError("Get mint sign", err)
 	}
 	return signeds, nil
+}
+
+func (ip *MintImpl) GetSignLatest(req *domain.RMinterGetSignLatest,
+) (*models.MintSign, error) {
+	var iot, err = ip.iiot.GetById(req.IotId)
+	if nil != err {
+		return nil, err
+	}
+
+	var signed = &models.MintSign{}
+	var query = ip.tblSign().Where("iot = ?", iot.Address).Order("updated_at desc")
+	err = query.Find(&signed).Error
+	if nil != err {
+		return nil, dmodels.ParsePostgresError("Get mint sign", err)
+	}
+	return signed, nil
 }
 
 func (ip *MintImpl) GetMinted(req *domain.RMinterGetMinted,

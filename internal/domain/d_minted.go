@@ -24,6 +24,10 @@ type RMinterGetSigns struct {
 	Sort  dmodels.Sort `json:"sort" form:"sort"`
 } //@name RMinterGetList
 
+type RMinterGetSignLatest struct {
+	IotId int64 `json:"iotId" uri:"iotId" binding:"required"`
+} //@name RMinterGetList
+
 type RMinterGetMinted struct {
 	From     int64             `json:"from" form:"from" binding:"required"` //
 	To       int64             `json:"to" form:"to" binding:"required"`     //
@@ -51,6 +55,8 @@ type IMinter interface {
 	Mint(*RMinterMint) error
 
 	GetSigns(*RMinterGetSigns) ([]*models.MintSign, error)
+	GetSignLatest(*RMinterGetSignLatest) (*models.MintSign, error)
+
 	GetMinted(*RMinterGetMinted) ([]*models.Minted, error)
 
 	GetSeparator() (*esign.TypedDataDomain, error)
