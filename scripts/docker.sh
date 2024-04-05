@@ -1,4 +1,4 @@
-TAG=dcarbon/iot-op
+TAG=dcarbon/iot-op:hackathon_v1
 
 docker build -t $TAG .
 if [[ "$1" == "push" ]];then
