@@ -2,13 +2,16 @@ package models
 
 import (
 	"encoding/base64"
+	"encoding/binary"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/Dcarbon/go-shared/dmodels"
 	"github.com/Dcarbon/go-shared/ecodes"
 	"github.com/Dcarbon/go-shared/libs/esign"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/crypto"
 )
 
 const (
@@ -68,6 +71,52 @@ func (msign *MintSign) Verify(dMinter *esign.ERC712) error {
 		return dmodels.NewError(ecodes.IOTInvalidMintSign, "Invalid mint sign: "+err.Error())
 	}
 	return nil
+}
+
+func (msign *MintSign) VerifySolana() error {
+	var signed, err = base64.StdEncoding.DecodeString(msign.Signed)
+	if nil != err {
+		return dmodels.NewError(
+			ecodes.IOTInvalidMintSign,
+			"Invalid signature. It must be base64: "+err.Error(),
+		)
+	}
+
+	buff, err := msign.GenerateSignData()
+	if nil != err {
+		return err
+	}
+
+	err = esign.VerifyPersonalSign(msign.Iot, crypto.Keccak256(buff), signed)
+	if nil != err {
+		return dmodels.NewError(ecodes.IOTInvalidMintSign, "Invalid mint sign: "+err.Error())
+	}
+
+	return nil
+}
+
+func (msign *MintSign) GenerateSignData() ([]byte, error) {
+	addr, err := hexutil.Decode(msign.Iot)
+	if nil != err {
+		return nil, err
+	}
+
+	amount, err := strconv.ParseUint(msign.Amount[2:], 16, 64)
+	if nil != err {
+		return nil, err
+	}
+
+	var buff = []byte{}
+
+	buff = append(buff, addr...)
+	buff = binary.BigEndian.AppendUint64(buff, uint64(amount))
+	buff = binary.BigEndian.AppendUint64(buff, uint64(msign.Nonce))
+
+	// buff = append(buff, addr...)
+	// buff = append(buff, []byte(strconv.FormatUint(amount, 10))...)
+	// buff = append(buff, []byte(strconv.FormatUint(nonce, 10))...)
+
+	return buff, nil
 }
 
 type Minted struct {

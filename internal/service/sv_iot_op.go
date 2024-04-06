@@ -7,7 +7,6 @@ import (
 	"github.com/Dcarbon/arch-proto/pb"
 	"github.com/Dcarbon/go-shared/dmodels"
 	"github.com/Dcarbon/go-shared/gutils"
-	"github.com/Dcarbon/go-shared/libs/esign"
 	"github.com/Dcarbon/go-shared/libs/utils"
 	"github.com/Dcarbon/go-shared/svc"
 	"github.com/Dcarbon/iot-op/internal/domain"
@@ -29,27 +28,27 @@ type Service struct {
 func NewService(config *gutils.Config) (*Service, error) {
 	rss.SetUrl(config.GetDBUrl(), config.GetRedisUrl())
 
-	var typedDomain = &esign.TypedDataDomain{
-		Name:              config.GetOption("CARBON_NAME"),
-		ChainId:           config.GetOptInt("CHAIN_ID"),
-		Version:           config.GetOption("CARBON_VERSION"),
-		VerifyingContract: config.GetOption("CARBON_ADDRESS"),
-	}
+	// var typedDomain = &esign.TypedDataDomain{
+	// 	Name:              config.GetOption("CARBON_NAME"),
+	// 	ChainId:           config.GetOptInt("CHAIN_ID"),
+	// 	Version:           config.GetOption("CARBON_VERSION"),
+	// 	VerifyingContract: config.GetOption("CARBON_ADDRESS"),
+	// }
 
-	dMinter, err := esign.NewERC712(
-		typedDomain,
-		esign.MustNewTypedDataField(
-			"Mint",
-			esign.TypedDataStruct,
-			esign.MustNewTypedDataField("iot", esign.TypedDataAddress),
-			esign.MustNewTypedDataField("amount", esign.TypedDataUint256),
-			esign.MustNewTypedDataField("nonce", esign.TypedDataUint256),
-		),
-	)
-	if nil != err {
-		return nil, err
-	}
-	utils.Dump("TypeDomainService: ", typedDomain)
+	// dMinter, err := esign.NewERC712(
+	// 	typedDomain,
+	// 	esign.MustNewTypedDataField(
+	// 		"Mint",
+	// 		esign.TypedDataStruct,
+	// 		esign.MustNewTypedDataField("iot", esign.TypedDataAddress),
+	// 		esign.MustNewTypedDataField("amount", esign.TypedDataUint256),
+	// 		esign.MustNewTypedDataField("nonce", esign.TypedDataUint256),
+	// 	),
+	// )
+	// if nil != err {
+	// 	return nil, err
+	// }
+	// utils.Dump("TypeDomainService: ", typedDomain)
 
 	iot, err := svc.NewIotService(config.GetIotHost())
 	if nil != err {
@@ -61,7 +60,12 @@ func NewService(config *gutils.Config) (*Service, error) {
 		return nil, err
 	}
 
-	iminter, err := repo.NewMinterImpl(rss.GetDB(), dMinter, iot)
+	// iminter, err := repo.NewMinterImpl(rss.GetDB(), dMinter, iot)
+	// if nil != err {
+	// 	return nil, err
+	// }
+
+	iminter, err := repo.NewSolanaMinterImpl(rss.GetDB(), iot)
 	if nil != err {
 		return nil, err
 	}
