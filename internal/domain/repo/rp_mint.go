@@ -197,10 +197,7 @@ func (ip *MintImpl) GetMinted(req *domain.RMinterGetMinted,
 		if group == "" {
 			return nil, gutils.ErrBadRequest("Invalid interval param")
 		}
-		if req.Interval == 2 {
-			group = "month"
-		}
-
+		fmt.Println("group = ", group)
 		query = ip.tblMinted().Raw(
 			fmt.Sprintf(
 				`WITH cte_minted as (%s) SELECT * FROM cte_minted`,
@@ -245,11 +242,11 @@ func (ip *MintImpl) GetMinted(req *domain.RMinterGetMinted,
 func (ip *MintImpl) IsIotActivated(req *domain.RIsIotActivated,
 ) (bool, error) {
 	var count = int64(0)
-	var err = ip.db.Table(models.TableNameMinted).Count(&count).Debug().
+	var err = ip.db.Table(models.TableNameMinted).
 		Where(
 			"created_at >= ? AND created_at < ? AND iot_id = ?",
 			time.Unix(req.From, 0), time.Unix(req.To, 0), req.IotId,
-		).Error
+		).Count(&count).Error
 	if nil != err {
 		return false, gutils.ParsePostgres("Check iot is actived", err)
 	}
