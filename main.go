@@ -82,6 +82,11 @@ var config = gutils.Config{
 			Permission: "",
 			PermDesc:   "",
 		},
+		"/pb.IotOpService/IsIotActivated": {
+			Require:    false,
+			Permission: "",
+			PermDesc:   "",
+		},
 	},
 }
 

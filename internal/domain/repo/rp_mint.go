@@ -242,6 +242,20 @@ func (ip *MintImpl) GetMinted(req *domain.RMinterGetMinted,
 	return data, nil
 }
 
+func (ip *MintImpl) IsIotActivated(req *domain.RIsIotActivated,
+) (bool, error) {
+	var count = int64(0)
+	var err = ip.db.Table(models.TableNameMinted).Count(&count).Debug().
+		Where(
+			"created_at >= ? AND created_at < ? AND iot_id = ?",
+			time.Unix(req.From, 0), time.Unix(req.To, 0), req.IotId,
+		).Error
+	if nil != err {
+		return false, gutils.ParsePostgres("Check iot is actived", err)
+	}
+	return count > 0, nil
+}
+
 func (ip *MintImpl) GetSeparator() (*esign.TypedDataDomain, error) {
 	return ip.dMinter.GetDomain(), nil
 }

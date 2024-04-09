@@ -28,6 +28,12 @@ type RMinterGetSignLatest struct {
 	IotId int64 `json:"iotId" uri:"iotId" binding:"required"`
 } //@name RMinterGetList
 
+type RIsIotActivated struct {
+	From  int64 `json:"from" form:"from" binding:"required"`
+	To    int64 `json:"to" form:"to" binding:"required"`
+	IotId int64 `json:"iotId" form:"iotId" binding:"required"`
+} //@name RIsIotActivated
+
 type RMinterGetMinted struct {
 	From     int64             `json:"from" form:"from" binding:"required"` //
 	To       int64             `json:"to" form:"to" binding:"required"`     //
@@ -56,8 +62,8 @@ type IMinter interface {
 
 	GetSigns(*RMinterGetSigns) ([]*models.MintSign, error)
 	GetSignLatest(*RMinterGetSignLatest) (*models.MintSign, error)
-
 	GetMinted(*RMinterGetMinted) ([]*models.Minted, error)
-
 	GetSeparator() (*esign.TypedDataDomain, error)
+	IsIotActivated(req *RIsIotActivated,
+	) (bool, error)
 }

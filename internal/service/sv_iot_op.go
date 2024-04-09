@@ -171,6 +171,19 @@ func (sv *Service) GetMintSignLatest(ctx context.Context, req *pb.RIotGetMintSig
 	return convertMintedSign(signed), nil
 }
 
+func (sv *Service) IsIotActivated(ctx context.Context, req *pb.RIotIsActivated,
+) (*pb.Bool, error) {
+	activated, err := sv.iminter.IsIotActivated(&domain.RIsIotActivated{
+		From:  req.From,
+		To:    req.To,
+		IotId: req.IotId,
+	})
+	if nil != err {
+		return nil, err
+	}
+	return &pb.Bool{Data: activated}, nil
+}
+
 func (sv *Service) GetMinted(ctx context.Context, req *pb.RIotGetMinted,
 ) (*pb.IotMinteds, error) {
 	data, err := sv.iminter.GetMinted(&domain.RMinterGetMinted{
