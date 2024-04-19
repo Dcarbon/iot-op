@@ -41,6 +41,11 @@ var config = gutils.Config{
 			Permission: "iot-op-get-mint-sign",
 			PermDesc:   "",
 		},
+		"/pb.IotOpService/GetMintSignLatest": {
+			Require:    false,
+			Permission: "iot-op-get-mint-sign-latest",
+			PermDesc:   "",
+		},
 		"/pb.IotOpService/GetMinted": {
 			Require:    false,
 			Permission: "iot-op-",

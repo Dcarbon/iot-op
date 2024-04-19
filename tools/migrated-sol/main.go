@@ -10,7 +10,7 @@ import (
 )
 
 var oldDbUrl = utils.StringEnv("OLD_DB_URL", "postgres://admin:244466666@10.60.0.58/iott?sslmode=disable")
-var newDbUrl = utils.StringEnv("DB_URL", "postgres://admin:hellosecret@localhost:5434/test_sign?sslmode=disable")
+var newDbUrl = utils.StringEnv("DB_URL", "postgres://admin:hellosecret@testnet.dcarbon.org/iot_op?sslmode=disable")
 
 var dbOld = dbutils.MustNewDB(oldDbUrl)
 var dbNew = dbutils.MustNewDB(newDbUrl)
@@ -23,7 +23,8 @@ func main() {
 		&models.Minted{},
 	)
 	utils.PanicError("Auto migrate new database", err)
-	TransformMintSign()
+	// TransformMintSign()
+	TransformMinted()
 }
 
 func TransformMinted() {
