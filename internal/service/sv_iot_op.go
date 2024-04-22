@@ -283,6 +283,15 @@ func (sv *Service) GetVersion(ctx context.Context, req *pb.RIotGetVersion,
 	return &pb.RsIotVersion{Version: version}, nil
 }
 
+func (sv *Service) Offset(ctx context.Context, req *pb.RIotOffset) (*pb.RsIotOffset, error) {
+	
+	res, err := sv.iminter.MintedOffset(domain.RIotOffset{})
+	if nil != err {
+		return nil, err
+	}
+	return &pb.RsIotOffset{Amount: res.Amount}, nil
+}
+
 func (sv *Service) initVersion() map[int32]string {
 	var rs = map[int32]string{
 		int32(dmodels.IotTypeWindPower): utils.StringEnv(

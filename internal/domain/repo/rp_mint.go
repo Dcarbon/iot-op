@@ -253,6 +253,25 @@ func (ip *MintImpl) IsIotActivated(req *domain.RIsIotActivated,
 	return count > 0, nil
 }
 
+func (ip *MintImpl) MintedOffset(input domain.RIotOffset) (*domain.RsIotOffset, error) {
+	iots, err := ip.iiot.GetIotsActivated()
+	if err != nil {
+		return nil, dmodels.ParsePostgresError("Query get iots fail,err: ", err)
+	}
+	for _, iot := range *iots {
+		input.IotIds = append(input.IotIds, iot.Id)
+	}
+	result := domain.RsIotOffset{}
+	var query = ip.tblSign().Select("sum((substring(amount from 2))::bit(40)::bigint / 1e9 ) AS amount")
+	if len(input.IotIds) > 0 {
+		query.Where("iot_id IN ?", input.IotIds)
+	}
+	if err := query.Find(&result).Error; err != nil {
+		return nil, dmodels.ParsePostgresError("Query minted offset fail,err: ", err)
+	}
+	return &result, nil
+}
+
 func (ip *MintImpl) GetSeparator() (*esign.TypedDataDomain, error) {
 	return ip.dMinter.GetDomain(), nil
 }

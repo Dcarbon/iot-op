@@ -26,7 +26,15 @@ type RMinterGetSigns struct {
 
 type RMinterGetSignLatest struct {
 	IotId int64 `json:"iotId" uri:"iotId" binding:"required"`
-} //@name RMinterGetList
+}
+
+type RIotOffset struct {
+	IotIds []int64 `json:"ids"`
+} //@name RIotOffset
+
+type RsIotOffset struct {
+	Amount float64 `json:"amount" gorm:"amount"`
+} //@name RIotOffset
 
 type RIsIotActivated struct {
 	From  int64 `json:"from" form:"from" binding:"required"`
@@ -66,4 +74,6 @@ type IMinter interface {
 	GetSeparator() (*esign.TypedDataDomain, error)
 	IsIotActivated(req *RIsIotActivated,
 	) (bool, error)
+
+	MintedOffset(RIotOffset) (*RsIotOffset, error)
 }

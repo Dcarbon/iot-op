@@ -87,6 +87,11 @@ var config = gutils.Config{
 			Permission: "",
 			PermDesc:   "",
 		},
+		"/pb.IotOpService/Offset": {
+			Require:    false,
+			Permission: "",
+			PermDesc:   "",
+		},
 	},
 }
 
