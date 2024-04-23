@@ -3,6 +3,7 @@ test
 static
 
 *.exe
+scripts
 *.exe~
 
 iot-op
