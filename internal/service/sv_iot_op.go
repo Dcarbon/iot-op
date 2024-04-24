@@ -78,7 +78,7 @@ func NewService(config *gutils.Config) (*Service, error) {
 		istate:  istate,
 	}
 
-	sv.iversion, err = repo.NewVersionImpl(sv.initVersion())
+	sv.iversion, err = repo.NewVersionImpl(sv.initVersion(), sv.initDownload())
 	if nil != err {
 		return nil, err
 	}
@@ -274,17 +274,21 @@ func (sv *Service) SetVersion(ctx context.Context, req *pb.RIotSetVersion,
 
 func (sv *Service) GetVersion(ctx context.Context, req *pb.RIotGetVersion,
 ) (*pb.RsIotVersion, error) {
-	version, err := sv.iversion.GetVersion(&domain.RVersionGet{
+	version, path, err := sv.iversion.GetVersion(&domain.RVersionGet{
 		IotType: req.IotType,
 	})
 	if nil != err {
 		return nil, err
 	}
-	return &pb.RsIotVersion{Version: version}, nil
+
+	return &pb.RsIotVersion{
+		Version: version,
+		Path:    path,
+	}, nil
 }
 
 func (sv *Service) Offset(ctx context.Context, req *pb.RIotOffset) (*pb.RsIotOffset, error) {
-	
+
 	res, err := sv.iminter.MintedOffset(domain.RIotOffset{})
 	if nil != err {
 		return nil, err
@@ -317,6 +321,55 @@ func (sv *Service) initVersion() map[int32]string {
 		int32(dmodels.IotTypeBurnTrash): utils.StringEnv(
 			fmt.Sprintf("VERSION_IOT_%d", dmodels.IotTypeBurnTrash),
 			"0.0.1",
+		),
+	}
+	return rs
+}
+
+func (sv *Service) initDownload() map[int32]string {
+	var rs = map[int32]string{
+		int32(dmodels.IotTypeWindPower): utils.StringEnv(
+			fmt.Sprintf("VERSION_IOT_%d_PATH", dmodels.IotTypeWindPower),
+			fmt.Sprintf("%s/static/iots/ota/%d/0.0.1",
+				utils.StringEnv(gutils.EXTERNAL_HOST, "http://localhost:4000"),
+				dmodels.IotTypeWindPower,
+			),
+		),
+
+		int32(dmodels.IotTypeSolarPower): utils.StringEnv(
+			fmt.Sprintf("VERSION_IOT_%d_PATH", dmodels.IotTypeSolarPower),
+			fmt.Sprintf("%s/static/iots/ota/%d/0.0.1",
+				utils.StringEnv(gutils.EXTERNAL_HOST, "http://localhost:4000"),
+				dmodels.IotTypeSolarPower,
+			),
+		),
+		int32(dmodels.IotTypeBurnMethane): utils.StringEnv(
+			fmt.Sprintf("VERSION_IOT_%d_PATH", dmodels.IotTypeBurnMethane),
+			fmt.Sprintf("%s/static/iots/ota/%d/0.0.1",
+				utils.StringEnv(gutils.EXTERNAL_HOST, "http://localhost:4000"),
+				dmodels.IotTypeBurnMethane,
+			),
+		),
+		int32(dmodels.IotTypeBurnBiomass): utils.StringEnv(
+			fmt.Sprintf("VERSION_IOT_%d_PATH", dmodels.IotTypeBurnBiomass),
+			fmt.Sprintf("%s/static/iots/ota/%d/0.0.1",
+				utils.StringEnv(gutils.EXTERNAL_HOST, "http://localhost:4000"),
+				dmodels.IotTypeBurnBiomass,
+			),
+		),
+		int32(dmodels.IotTypeFertilizer): utils.StringEnv(
+			fmt.Sprintf("VERSION_IOT_%d_PATH", dmodels.IotTypeFertilizer),
+			fmt.Sprintf("%s/static/iots/ota/%d/0.0.1",
+				gutils.EXTERNAL_HOST,
+				dmodels.IotTypeFertilizer,
+			),
+		),
+		int32(dmodels.IotTypeBurnTrash): utils.StringEnv(
+			fmt.Sprintf("VERSION_IOT_%d_PATH", dmodels.IotTypeBurnTrash),
+			fmt.Sprintf("%s/static/iots/ota/%d/0.0.1",
+				utils.StringEnv(gutils.EXTERNAL_HOST, "http://localhost:4000"),
+				dmodels.IotTypeBurnTrash,
+			),
 		),
 	}
 	return rs

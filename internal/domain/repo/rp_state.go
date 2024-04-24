@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/Dcarbon/go-shared/gutils"
@@ -41,7 +40,7 @@ func (impl *StateImpl) Update(req *domain.RStateUpdate,
 	if nil != err {
 		return gutils.ErrBadRequest("Invalid state format " + err.Error())
 	}
-	log.Println("state raw: ", string(stateRaw))
+	// log.Println("state raw: ", string(stateRaw))
 
 	var state = &models.StateExtract{}
 	err = json.Unmarshal(stateRaw, state)

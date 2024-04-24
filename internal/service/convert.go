@@ -18,6 +18,7 @@ func convertAVM(in *models.AVM) *pb.AVM {
 
 func convertMintedSign(in *models.MintSign,
 ) *pb.MintedSign {
+	// log.Println("Convert mint sign: ", in)
 	var rs = &pb.MintedSign{
 		Id:        in.Id,
 		IotId:     in.IotId,

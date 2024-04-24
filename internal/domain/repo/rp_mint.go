@@ -142,17 +142,21 @@ func (ip *MintImpl) Mint(req *domain.RMinterMint,
 
 func (ip *MintImpl) GetSigns(req *domain.RMinterGetSigns,
 ) ([]*models.MintSign, error) {
-	var iot, err = ip.iiot.GetById(req.IotId)
-	if nil != err {
-		return nil, err
-	}
+	// var iot, err = ip.iiot.GetById(req.IotId)
+	// if nil != err {
+	// 	return nil, err
+	// }
 
 	var signeds = make([]*models.MintSign, 0)
-	var query = ip.tblSign().
-		Where(
-			"updated_at > ? AND updated_at < ? AND iot = ?",
-			time.Unix(req.From, 0), time.Unix(req.To, 0), iot.Address,
+	var query = ip.tblSign()
+	if req.From > 0 {
+		query = query.Where(
+			"updated_at > ? AND updated_at < ? AND iot_id = ?",
+			time.Unix(req.From, 0), time.Unix(req.To, 0), req.IotId,
 		)
+	} else {
+		query = query.Where("iot_id = ?", req.IotId)
+	}
 
 	if req.Sort > 0 {
 		query = query.Order("updated_at desc")
@@ -163,7 +167,8 @@ func (ip *MintImpl) GetSigns(req *domain.RMinterGetSigns,
 	if req.Limit > 0 {
 		query = query.Limit(req.Limit)
 	}
-	err = query.Find(&signeds).Error
+
+	err := query.Find(&signeds).Error
 	if nil != err {
 		return nil, dmodels.ParsePostgresError("Get mint sign", err)
 	}

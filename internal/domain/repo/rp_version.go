@@ -6,16 +6,14 @@ import (
 )
 
 type VersionImpl struct {
-	data *container.SafeMap[int32, string]
+	version *container.SafeMap[int32, string] // Latest version of ota
+	path    *container.SafeMap[int32, string] // Path to download version
 }
 
-func NewVersionImpl(initData map[int32]string) (*VersionImpl, error) {
+func NewVersionImpl(initVersion map[int32]string, initPath map[int32]string) (*VersionImpl, error) {
 	var vImpl = &VersionImpl{
-		data: container.NewSafeMap[int32, string](),
-	}
-
-	for k, v := range initData {
-		vImpl.data.Set(k, v)
+		version: container.NewSafeMapFrom(initVersion),
+		path:    container.NewSafeMapFrom(initPath),
 	}
 
 	return vImpl, nil
@@ -23,12 +21,13 @@ func NewVersionImpl(initData map[int32]string) (*VersionImpl, error) {
 
 func (vImpl *VersionImpl) SetVersion(req *domain.RVersionSet,
 ) error {
-	vImpl.data.Set(req.IotType, req.Version)
+	vImpl.version.Set(req.IotType, req.Version)
 	return nil
 }
 
 func (vImpl *VersionImpl) GetVersion(req *domain.RVersionGet,
-) (string, error) {
-	version, _ := vImpl.data.Get(req.IotType)
-	return version, nil
+) (string, string, error) {
+	version, _ := vImpl.version.Get(req.IotType)
+	path, _ := vImpl.path.Get(req.IotType)
+	return version, path, nil
 }

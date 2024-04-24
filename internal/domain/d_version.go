@@ -11,5 +11,5 @@ type RVersionGet struct {
 
 type IVersion interface {
 	SetVersion(*RVersionSet) error
-	GetVersion(*RVersionGet) (string, error)
+	GetVersion(*RVersionGet) (string, string, error)
 }
