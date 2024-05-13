@@ -312,7 +312,7 @@ func (sv *Service) initVersion() map[int32]string {
 		),
 		int32(dmodels.IotTypeBurnBiomass): utils.StringEnv(
 			fmt.Sprintf("VERSION_IOT_%d", dmodels.IotTypeBurnBiomass),
-			"0.0.3",
+			"0.0.4",
 		),
 		int32(dmodels.IotTypeFertilizer): utils.StringEnv(
 			fmt.Sprintf("VERSION_IOT_%d", dmodels.IotTypeFertilizer),
@@ -352,7 +352,7 @@ func (sv *Service) initDownload() map[int32]string {
 		),
 		int32(dmodels.IotTypeBurnBiomass): utils.StringEnv(
 			fmt.Sprintf("VERSION_IOT_%d_PATH", dmodels.IotTypeBurnBiomass),
-			fmt.Sprintf("%s/static/iots/ota/%d/0.0.3",
+			fmt.Sprintf("%s/static/iots/ota/%d/0.0.4",
 				utils.StringEnv(gutils.EXTERNAL_HOST, "http://localhost:4000"),
 				dmodels.IotTypeBurnBiomass,
 			),
