@@ -82,9 +82,6 @@ func (aimpl *AVMImpl) GetList(req *domain.RAVMGetList,
 		if group == "" {
 			return nil, gutils.ErrBadRequest("Invalid interval param")
 		}
-		if req.Interval == 2 {
-			group = "month"
-		}
 
 		query = aimpl.tblAVM().Raw(
 			fmt.Sprintf(
