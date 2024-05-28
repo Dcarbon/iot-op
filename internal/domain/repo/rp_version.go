@@ -1,7 +1,11 @@
 package repo
 
 import (
+	"fmt"
+
+	"github.com/Dcarbon/go-shared/gutils"
 	"github.com/Dcarbon/go-shared/libs/container"
+	"github.com/Dcarbon/go-shared/libs/utils"
 	"github.com/Dcarbon/iot-op/internal/domain"
 )
 
@@ -22,6 +26,8 @@ func NewVersionImpl(initVersion map[int32]string, initPath map[int32]string) (*V
 func (vImpl *VersionImpl) SetVersion(req *domain.RVersionSet,
 ) error {
 	vImpl.version.Set(req.IotType, req.Version)
+	vImpl.path.Set(req.IotType, fmt.Sprintf("%s/static/iots/ota/%d/%s",
+		utils.StringEnv(gutils.EXTERNAL_HOST, "http://localhost:4000"), req.IotType, req.Version))
 	return nil
 }
 
