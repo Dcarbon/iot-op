@@ -184,7 +184,7 @@ func (ip *MintImpl) GetSignLatest(req *domain.RMinterGetSignLatest,
 
 	var signed = &models.MintSign{}
 	var query = ip.tblSign().Where("iot = ?", iot.Address).Order("updated_at desc")
-	err = query.Find(&signed).Error
+	err = query.Debug().Find(&signed).Error
 	if nil != err {
 		return nil, dmodels.ParsePostgresError("Get mint sign", err)
 	}
@@ -267,7 +267,7 @@ func (ip *MintImpl) MintedOffset(input domain.RIotOffset) (*domain.RsIotOffset, 
 		input.IotIds = append(input.IotIds, iot.Id)
 	}
 	result := domain.RsIotOffset{}
-	var query = ip.tblSign().Select("sum((substring(amount from 2))::bit(40)::bigint / 1e9 ) AS amount")
+	var query = ip.tblSign().Select("sum((substring(amount from 2))::bit(33)::bigint / 1e9 ) AS amount")
 	if len(input.IotIds) > 0 {
 		query.Where("iot_id IN ?", input.IotIds)
 	}

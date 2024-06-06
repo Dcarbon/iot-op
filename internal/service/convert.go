@@ -26,7 +26,7 @@ func convertMintedSign(in *models.MintSign,
 		Amount:    in.Amount,
 		Signed:    in.Signed,
 		CreatedAt: in.CreatedAt.UnixMilli(),
-		UpdatedAt: in.CreatedAt.UnixMilli(),
+		UpdatedAt: in.UpdatedAt.UnixMilli(),
 	}
 	return rs
 }

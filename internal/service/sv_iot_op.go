@@ -14,6 +14,7 @@ import (
 	"github.com/Dcarbon/iot-op/internal/domain/repo"
 	"github.com/Dcarbon/iot-op/internal/domain/rss"
 	"github.com/Dcarbon/iot-op/internal/models"
+	"google.golang.org/grpc/peer"
 )
 
 type Service struct {
@@ -277,6 +278,9 @@ func (sv *Service) GetVersion(ctx context.Context, req *pb.RIotGetVersion,
 	version, path, err := sv.iversion.GetVersion(&domain.RVersionGet{
 		IotType: req.IotType,
 	})
+	p, _ := peer.FromContext(ctx)
+	fmt.Println("IP Called: " + p.Addr.String())
+
 	if nil != err {
 		return nil, err
 	}
