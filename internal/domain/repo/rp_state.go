@@ -55,7 +55,7 @@ func (impl *StateImpl) Update(req *domain.RStateUpdate,
 	}
 
 	// log.Println("Key: ", getKey(iot.Id))
-	_, err = impl.rClient.SetNX(
+	_, err = impl.rClient.Set(
 		context.TODO(), getKey(iot.Id), stateRaw, stateDuration,
 	).Result()
 	if nil != err {
