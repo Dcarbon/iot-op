@@ -89,7 +89,6 @@ func (impl *StateImpl) Get(req *domain.RStateGet,
 	if nil != err {
 		return nil, err
 	}
-
 	return rs, nil
 }
 

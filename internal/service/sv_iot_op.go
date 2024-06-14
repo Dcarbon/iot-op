@@ -234,12 +234,14 @@ func (sv *Service) GetState(ctx context.Context, req *pb.IdInt64,
 		State:     int32(state.State),
 		Sensors:   make([]*pb.SensorState, len(state.Sensors)),
 		CreatedAt: state.CreatedAt,
+		Info:      state.Info,
 	}
 
 	for i, it := range state.Sensors {
 		rs.Sensors[i] = &pb.SensorState{
 			State:  int32(it.State),
 			Metric: it.Metric,
+			Type:   int32(it.Type),
 		}
 	}
 	return rs, nil

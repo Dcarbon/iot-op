@@ -17,8 +17,9 @@ type Sensor struct {
 }
 
 type StateExtract struct {
-	Signer    string    `json:"signer"`
-	State     State     `json:"state"   `
-	Sensors   []*Sensor `json:"sensors" `
-	CreatedAt int64     `json:"createdAt"`
+	Signer    string            `json:"signer"`
+	State     State             `json:"state"   `
+	Info      map[string]string `json:"info"`
+	Sensors   []*Sensor         `json:"sensors" `
+	CreatedAt int64             `json:"createdAt"`
 }
