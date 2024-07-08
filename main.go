@@ -97,6 +97,11 @@ var config = gutils.Config{
 			Permission: "",
 			PermDesc:   "",
 		},
+		"/pb.IotOpService/GetMint": {
+			Require:    false,
+			Permission: "",
+			PermDesc:   "",
+		},
 	},
 }
 

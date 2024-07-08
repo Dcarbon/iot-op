@@ -67,7 +67,7 @@ func (r *RMinterGetMinted) Normalize() {
 
 type IMinter interface {
 	Mint(*RMinterMint) error
-
+	GetSign(req *RMinterGetSigns) ([]*models.MintSign, error)
 	GetSigns(*RMinterGetSigns) ([]*models.MintSign, error)
 	GetSignLatest(*RMinterGetSignLatest) (*models.MintSign, error)
 	GetMinted(*RMinterGetMinted) ([]*models.Minted, error)

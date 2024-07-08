@@ -157,6 +157,25 @@ func (sv *Service) GetMintSigns(ctx context.Context, req *pb.RIotGetMintSigns,
 	}, nil
 }
 
+func (sv *Service) GetMint(ctx context.Context, req *pb.RIotGetMintSigns,
+) (*pb.MintedSigns, error) {
+	signeds, err := sv.iminter.GetSign(&domain.RMinterGetSigns{
+		From:  req.From,
+		To:    req.To,
+		IotId: req.IotId,
+		Sort:  dmodels.Sort(req.Sort),
+		Limit: int(req.Limit),
+	})
+	if nil != err {
+		return nil, err
+	}
+
+	return &pb.MintedSigns{
+		Total: 0,
+		Data:  convertArr(signeds, convertMintedSign),
+	}, nil
+}
+
 func (sv *Service) GetMintSignLatest(ctx context.Context, req *pb.RIotGetMintSignLatest,
 ) (*pb.MintedSign, error) {
 	signed, err := sv.iminter.GetSignLatest(&domain.RMinterGetSignLatest{
