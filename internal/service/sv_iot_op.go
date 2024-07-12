@@ -333,11 +333,11 @@ func (sv *Service) initVersion() map[int32]string {
 		),
 		int32(dmodels.IotTypeBurnMethane): utils.StringEnv(
 			fmt.Sprintf("VERSION_IOT_%d", dmodels.IotTypeBurnMethane),
-			"0.0.1",
+			"0.0.2",
 		),
 		int32(dmodels.IotTypeBurnBiomass): utils.StringEnv(
 			fmt.Sprintf("VERSION_IOT_%d", dmodels.IotTypeBurnBiomass),
-			"0.0.5",
+			"0.0.6",
 		),
 		int32(dmodels.IotTypeFertilizer): utils.StringEnv(
 			fmt.Sprintf("VERSION_IOT_%d", dmodels.IotTypeFertilizer),
