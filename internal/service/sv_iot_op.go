@@ -370,14 +370,14 @@ func (sv *Service) initDownload() map[int32]string {
 		),
 		int32(dmodels.IotTypeBurnMethane): utils.StringEnv(
 			fmt.Sprintf("VERSION_IOT_%d_PATH", dmodels.IotTypeBurnMethane),
-			fmt.Sprintf("%s/static/iots/ota/%d/0.0.1",
+			fmt.Sprintf("%s/static/iots/ota/%d/0.0.2",
 				utils.StringEnv(gutils.EXTERNAL_HOST, "http://localhost:4000"),
 				dmodels.IotTypeBurnMethane,
 			),
 		),
 		int32(dmodels.IotTypeBurnBiomass): utils.StringEnv(
 			fmt.Sprintf("VERSION_IOT_%d_PATH", dmodels.IotTypeBurnBiomass),
-			fmt.Sprintf("%s/static/iots/ota/%d/0.0.5",
+			fmt.Sprintf("%s/static/iots/ota/%d/0.0.6",
 				utils.StringEnv(gutils.EXTERNAL_HOST, "http://localhost:4000"),
 				dmodels.IotTypeBurnBiomass,
 			),
