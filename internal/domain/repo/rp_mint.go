@@ -185,11 +185,10 @@ func (ip *MintImpl) GetSign(req *domain.RMinterGetSigns,
 			time.Unix(req.From, 0), time.Unix(req.To, 0), req.IotId,
 		)
 	}
-	if req.Sort > 0 {
-		query = query.Order("updated_at desc")
-	} else {
-		query = query.Order("updated_at asc")
+	if req.IotId != 0 {
+		query = query.Where("iot_id = ?", req.IotId)
 	}
+	query = query.Order("updated_at desc,nonce desc")
 	if req.Limit > 0 {
 		query = query.Limit(req.Limit)
 	}
