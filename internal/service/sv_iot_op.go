@@ -79,7 +79,11 @@ func NewService(config *gutils.Config) (*Service, error) {
 		istate:  istate,
 	}
 
-	sv.iversion, err = repo.NewVersionImpl(sv.initVersion(), sv.initDownload())
+	// sv.iversion, err = repo.NewVersionImpl(sv.initVersion(), sv.initDownload())
+	// if nil != err {
+	// 	return nil, err
+	// }
+	sv.iversion, err = repo.NewVersionImpl(rss.GetDB())
 	if nil != err {
 		return nil, err
 	}
@@ -305,10 +309,9 @@ func (sv *Service) GetVersion(ctx context.Context, req *pb.RIotGetVersion,
 	if nil != err {
 		return nil, err
 	}
-
 	return &pb.RsIotVersion{
 		Version: version,
-		Path:    path,
+		Path:    utils.StringEnv(gutils.EXTERNAL_HOST, "http://localhost:4000") + path,
 	}, nil
 }
 
