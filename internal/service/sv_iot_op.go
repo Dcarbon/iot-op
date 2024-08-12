@@ -2,7 +2,10 @@ package service
 
 import (
 	"context"
+	"encoding/binary"
+	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/Dcarbon/arch-proto/pb"
 	"github.com/Dcarbon/go-shared/dmodels"
@@ -14,6 +17,8 @@ import (
 	"github.com/Dcarbon/iot-op/internal/domain/repo"
 	"github.com/Dcarbon/iot-op/internal/domain/rss"
 	"github.com/Dcarbon/iot-op/internal/models"
+	"github.com/blocto/solana-go-sdk/client"
+	"github.com/blocto/solana-go-sdk/common"
 	"google.golang.org/grpc/peer"
 )
 
@@ -25,6 +30,7 @@ type Service struct {
 	iminter  domain.IMinter
 	istate   domain.IState
 	iversion domain.IVersion
+	client   *client.Client
 }
 
 func NewService(config *gutils.Config) (*Service, error) {
@@ -72,23 +78,35 @@ func NewService(config *gutils.Config) (*Service, error) {
 		return nil, err
 	}
 
+	client := client.NewClient(utils.StringEnv("RPC_URL", "x"))
+
 	sv := &Service{
 		iot:     iot,
 		iavm:    iavm,
 		iminter: iminter,
 		istate:  istate,
+		client:  client,
 	}
 
-	// sv.iversion, err = repo.NewVersionImpl(sv.initVersion(), sv.initDownload())
-	// if nil != err {
-	// 	return nil, err
-	// }
 	sv.iversion, err = repo.NewVersionImpl(rss.GetDB())
 	if nil != err {
 		return nil, err
 	}
 
 	return sv, nil
+}
+
+func (sv *Service) getAccountInfo(ctx context.Context, seeds [][]byte) (*client.AccountInfo, error) {
+	programID := common.PublicKeyFromString(utils.StringEnv("DCARBON_SMART_CONTRACT", "x"))
+	pda, _, err := common.FindProgramAddress(seeds, programID)
+	if err != nil {
+		return nil, &dmodels.Error{Code: 99, Message: fmt.Sprintf("Error finding program address: %v", err)}
+	}
+	accountInfo, err := sv.client.GetAccountInfo(ctx, pda.ToBase58())
+	if err != nil {
+		return nil, &dmodels.Error{Code: 98, Message: fmt.Sprintf("Error get account info: %v", err)}
+	}
+	return &accountInfo, nil
 }
 
 func (sv *Service) CreateAVM(ctx context.Context, req *pb.RAVMCreate,
@@ -324,6 +342,45 @@ func (sv *Service) Offset(ctx context.Context, req *pb.RIotOffset) (*pb.RsIotOff
 	return &pb.RsIotOffset{Amount: res.Amount}, nil
 }
 
+func (sv *Service) GetCoefficient(ctx context.Context, req *pb.RGetCoefficient) (*pb.RSGetCoefficient, error) {
+	accountInfo, err := sv.getAccountInfo(ctx, [][]byte{
+		[]byte("coefficient"),
+		[]byte(req.Key),
+	})
+	if nil != err {
+		return nil, err
+	}
+	if len(accountInfo.Data) <= 0 {
+		return nil, errors.New("coefficient unset")
+	}
+	offset := 8 + 4 + len(req.Key)
+	lastEightBytes := accountInfo.Data[offset : offset+8]
+	coefficient := binary.LittleEndian.Uint64(lastEightBytes)
+	return &pb.RSGetCoefficient{
+		Coefficient: coefficient,
+	}, nil
+}
+
+func (sv *Service) GetNonce(ctx context.Context, req *pb.RGetNonce) (*pb.RSGetNonce, error) {
+	accountInfo, err := sv.getAccountInfo(ctx, [][]byte{
+		[]byte("device_status"),
+		u16ToBytes(req.DeviceId),
+	})
+	if nil != err {
+		return nil, err
+	}
+	if len(accountInfo.Data) <= 0 {
+		return &pb.RSGetNonce{
+			Data: 0,
+		}, nil
+	}
+	lastTwoBytes := accountInfo.Data[len(accountInfo.Data)-2:]
+	nonce := binary.LittleEndian.Uint16(lastTwoBytes)
+	return &pb.RSGetNonce{
+		Data: uint64(nonce),
+	}, nil
+}
+
 func (sv *Service) initVersion() map[int32]string {
 	var rs = map[int32]string{
 		int32(dmodels.IotTypeWindPower): utils.StringEnv(
@@ -401,4 +458,15 @@ func (sv *Service) initDownload() map[int32]string {
 		),
 	}
 	return rs
+}
+func u16ToBytes(str string) []byte {
+	bytes := make([]byte, 2)
+	num, err := strconv.ParseUint(str, 10, 16)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return bytes
+	}
+	uint16Value := uint16(num)
+	binary.LittleEndian.PutUint16(bytes, uint16Value)
+	return bytes
 }

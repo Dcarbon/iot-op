@@ -102,6 +102,16 @@ var config = gutils.Config{
 			Permission: "",
 			PermDesc:   "",
 		},
+		"/pb.IotOpService/GetCoefficient": {
+			Require:    false,
+			Permission: "",
+			PermDesc:   "",
+		},
+		"/pb.IotOpService/GetNonce": {
+			Require:    false,
+			Permission: "",
+			PermDesc:   "",
+		},
 	},
 }
 
