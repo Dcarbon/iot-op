@@ -1,8 +1,10 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	"encoding/binary"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -78,7 +80,7 @@ func NewService(config *gutils.Config) (*Service, error) {
 		return nil, err
 	}
 
-	client := client.NewClient(utils.StringEnv("RPC_URL", "x"))
+	client := client.NewClient(utils.StringEnv("RPC_URL", "https://devnet.helius-rpc.com/?api-key=8f88217f-c97b-4309-a38a-f5935725082e"))
 
 	sv := &Service{
 		iot:     iot,
@@ -97,7 +99,7 @@ func NewService(config *gutils.Config) (*Service, error) {
 }
 
 func (sv *Service) getAccountInfo(ctx context.Context, seeds [][]byte) (*client.AccountInfo, error) {
-	programID := common.PublicKeyFromString(utils.StringEnv("DCARBON_SMART_CONTRACT", "x"))
+	programID := common.PublicKeyFromString(utils.StringEnv("DCARBON_SMART_CONTRACT", "75eELePzbpEwD1tAEvYna5ZJtC26GeU42uF3ycyyTCt2"))
 	pda, _, err := common.FindProgramAddress(seeds, programID)
 	if err != nil {
 		return nil, &dmodels.Error{Code: 99, Message: fmt.Sprintf("Error finding program address: %v", err)}
@@ -262,6 +264,14 @@ func (sv *Service) UpdateState(ctx context.Context, req *pb.RIotUpdateState,
 	return &pb.Empty{}, nil
 }
 
+func createKeyValuePairs(m map[string]interface{}) string {
+	b := new(bytes.Buffer)
+	for key, value := range m {
+		fmt.Fprintf(b, "%s=\"%v\"", key, value)
+	}
+	return b.String()
+}
+
 func (sv *Service) GetState(ctx context.Context, req *pb.IdInt64,
 ) (*pb.IotState, error) {
 	state, err := sv.istate.Get(&domain.RStateGet{
@@ -270,14 +280,18 @@ func (sv *Service) GetState(ctx context.Context, req *pb.IdInt64,
 	if nil != err {
 		return nil, err
 	}
-
-	var rs = &pb.IotState{
-		State:     int32(state.State),
-		Sensors:   make([]*pb.SensorState, len(state.Sensors)),
-		CreatedAt: state.CreatedAt,
-		Info:      state.Info,
+	b, err := json.Marshal(state.Additional)
+	if err != nil {
+		panic(err)
 	}
 
+	var rs = &pb.IotState{
+		State:      int32(state.State),
+		Sensors:    make([]*pb.SensorState, len(state.Sensors)),
+		CreatedAt:  state.CreatedAt,
+		Info:       state.Info,
+		Additional: b,
+	}
 	for i, it := range state.Sensors {
 		rs.Sensors[i] = &pb.SensorState{
 			State:  int32(it.State),
@@ -371,13 +385,13 @@ func (sv *Service) GetNonce(ctx context.Context, req *pb.RGetNonce) (*pb.RSGetNo
 	}
 	if len(accountInfo.Data) <= 0 {
 		return &pb.RSGetNonce{
-			Data: 0,
+			Data: strconv.FormatUint(uint64(0), 10),
 		}, nil
 	}
 	lastTwoBytes := accountInfo.Data[len(accountInfo.Data)-2:]
 	nonce := binary.LittleEndian.Uint16(lastTwoBytes)
 	return &pb.RSGetNonce{
-		Data: uint64(nonce),
+		Data: strconv.FormatUint(uint64(nonce), 10),
 	}, nil
 }
 
