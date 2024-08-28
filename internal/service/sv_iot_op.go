@@ -94,6 +94,7 @@ func NewService(config *gutils.Config) (*Service, error) {
 	if nil != err {
 		return nil, err
 	}
+	//sv.iversion
 
 	return sv, nil
 }
@@ -323,6 +324,7 @@ func (sv *Service) SetVersion(ctx context.Context, req *pb.RIotSetVersion,
 	err := sv.iversion.SetVersion(&domain.RVersionSet{
 		IotType: req.IotType,
 		Version: req.Version,
+		Path:    req.Path,
 	})
 	if nil != err {
 		return nil, err
@@ -343,7 +345,7 @@ func (sv *Service) GetVersion(ctx context.Context, req *pb.RIotGetVersion,
 	}
 	return &pb.RsIotVersion{
 		Version: version,
-		Path:    utils.StringEnv(gutils.EXTERNAL_HOST, "http://localhost:4000") + path,
+		Path:    path,
 	}, nil
 }
 

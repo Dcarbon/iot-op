@@ -1,8 +1,6 @@
 package repo
 
 import (
-	"fmt"
-
 	"github.com/Dcarbon/go-shared/libs/container"
 	"github.com/Dcarbon/iot-op/internal/domain"
 	"github.com/Dcarbon/iot-op/internal/models"
@@ -16,7 +14,8 @@ type Version2Impl struct {
 }
 
 type VersionImpl struct {
-	db *gorm.DB
+	db   *gorm.DB
+	data map[int32]*models.Version
 }
 
 func NewVersion2Impl(initVersion map[int32]string, initPath map[int32]string) (*Version2Impl, error) {
@@ -28,6 +27,8 @@ func NewVersion2Impl(initVersion map[int32]string, initPath map[int32]string) (*
 	return vImpl, nil
 }
 
+var Data map[int32]*models.Version
+
 func NewVersionImpl(db *gorm.DB) (*VersionImpl, error) {
 	err := db.AutoMigrate(
 		&models.Version{},
@@ -38,7 +39,24 @@ func NewVersionImpl(db *gorm.DB) (*VersionImpl, error) {
 	var vImpl = &VersionImpl{
 		db: db,
 	}
+	vImpl.InitVersion()
+	Data = vImpl.data
 	return vImpl, nil
+}
+
+func (vImpl *VersionImpl) InitVersion() {
+	var versions = &[]models.Version{}
+	result := make(map[int32]*models.Version)
+	if err := vImpl.tblVersion().Find(&versions).Error; err != nil {
+		vImpl.data = result
+	}
+
+	if len(*versions) > 0 {
+		for _, val := range *versions {
+			result[val.IotType] = &val
+		}
+	}
+	vImpl.data = result
 }
 
 // func (vImpl *VersionImpl) SetVersion(req *domain.RVersionSet,
@@ -61,7 +79,7 @@ func (vImpl *VersionImpl) SetVersion(req *domain.RVersionSet,
 	version := models.Version{
 		IotType: req.IotType,
 		Version: req.Version,
-		Path:    fmt.Sprintf("/static/iots/ota/%d/%s", req.IotType, req.Version),
+		Path:    req.Path,
 	}
 	if err := vImpl.tblVersion().Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "iot_type"}},
@@ -69,16 +87,17 @@ func (vImpl *VersionImpl) SetVersion(req *domain.RVersionSet,
 	}).Create(&version).Error; err != nil {
 		return err
 	}
+	Data[req.IotType] = &version
 	return nil
 }
 
 func (vImpl *VersionImpl) GetVersion(req *domain.RVersionGet,
 ) (string, string, error) {
-	var version = &models.Version{}
-	if err := vImpl.tblVersion().Where("iot_type = ? ", req.IotType).First(&version).Error; err != nil {
-		return "", "", err
+	value := vImpl.data[req.IotType]
+	if value == nil {
+		return "", "", nil
 	}
-	return version.Version, version.Path, nil
+	return value.Version, value.Path, nil
 }
 
 func (vImpl *VersionImpl) tblVersion() *gorm.DB {
