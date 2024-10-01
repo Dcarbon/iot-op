@@ -8,6 +8,7 @@ type RVersionSet struct {
 
 type RVersionGet struct {
 	IotType int32
+	Version *string
 }
 
 type IVersion interface {

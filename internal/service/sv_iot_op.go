@@ -336,7 +336,10 @@ func (sv *Service) GetVersion(ctx context.Context, req *pb.RIotGetVersion,
 ) (*pb.RsIotVersion, error) {
 	version, path, err := sv.iversion.GetVersion(&domain.RVersionGet{
 		IotType: req.IotType,
+		Version: &req.Version,
 	})
+	var Host = utils.StringEnv("S3_BUCKET_URL", "localhost")
+
 	p, _ := peer.FromContext(ctx)
 	fmt.Println("IP Called: " + p.Addr.String())
 
@@ -345,7 +348,7 @@ func (sv *Service) GetVersion(ctx context.Context, req *pb.RIotGetVersion,
 	}
 	return &pb.RsIotVersion{
 		Version: version,
-		Path:    path,
+		Path:    Host + "/" + path,
 	}, nil
 }
 

@@ -1,6 +1,8 @@
 package repo
 
 import (
+	"fmt"
+
 	"github.com/Dcarbon/go-shared/libs/container"
 	"github.com/Dcarbon/iot-op/internal/domain"
 	"github.com/Dcarbon/iot-op/internal/models"
@@ -26,9 +28,6 @@ func NewVersion2Impl(initVersion map[int32]string, initPath map[int32]string) (*
 
 	return vImpl, nil
 }
-
-var Data map[int32]*models.Version
-
 func NewVersionImpl(db *gorm.DB) (*VersionImpl, error) {
 	err := db.AutoMigrate(
 		&models.Version{},
@@ -39,24 +38,7 @@ func NewVersionImpl(db *gorm.DB) (*VersionImpl, error) {
 	var vImpl = &VersionImpl{
 		db: db,
 	}
-	vImpl.InitVersion()
-	Data = vImpl.data
 	return vImpl, nil
-}
-
-func (vImpl *VersionImpl) InitVersion() {
-	var versions = &[]models.Version{}
-	result := make(map[int32]*models.Version)
-	if err := vImpl.tblVersion().Find(&versions).Error; err != nil {
-		vImpl.data = result
-	}
-
-	if len(*versions) > 0 {
-		for _, val := range *versions {
-			result[val.IotType] = &val
-		}
-	}
-	vImpl.data = result
 }
 
 // func (vImpl *VersionImpl) SetVersion(req *domain.RVersionSet,
@@ -82,20 +64,26 @@ func (vImpl *VersionImpl) SetVersion(req *domain.RVersionSet,
 		Path:    req.Path,
 	}
 	if err := vImpl.tblVersion().Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "iot_type"}},
-		DoUpdates: clause.AssignmentColumns([]string{"version", "path"}),
+		Columns:   []clause.Column{{Name: "iot_type"}, {Name: "version"}},
+		DoUpdates: clause.AssignmentColumns([]string{"version", "path", "updated_at"}),
 	}).Create(&version).Error; err != nil {
 		return err
 	}
-	Data[req.IotType] = &version
 	return nil
 }
 
 func (vImpl *VersionImpl) GetVersion(req *domain.RVersionGet,
 ) (string, string, error) {
-	value := vImpl.data[req.IotType]
-	if value == nil {
-		return "", "", nil
+	value := models.Version{}
+	query := vImpl.tblVersion().Select("version", "path").
+		Where("iot_type = ?", req.IotType)
+	fmt.Println("version= ", req.Version)
+	if req.Version != nil && *req.Version != "" {
+		query.Where("version = ? ", req.Version)
+	}
+	query.Order("created_at DESC").Limit(1)
+	if err := query.First(&value).Error; err != nil {
+		return "", "", err
 	}
 	return value.Version, value.Path, nil
 }

@@ -45,7 +45,6 @@ func (impl *StateImpl) Update(req *domain.RStateUpdate,
 	if nil != err {
 		return gutils.ErrBadRequest("Invalid state format " + err.Error())
 	}
-	// log.Println("state raw: ", string(stateRaw))
 
 	var state = &models.StateExtract{}
 	err = json.Unmarshal(stateRaw, state)
@@ -59,7 +58,6 @@ func (impl *StateImpl) Update(req *domain.RStateUpdate,
 		return err
 	}
 
-	// log.Println("Key: ", getKey(iot.Id))
 	_, err = impl.rClient.Set(
 		context.TODO(), getKey(iot.Id), stateRaw, stateDuration,
 	).Result()
