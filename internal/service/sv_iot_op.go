@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/Dcarbon/arch-proto/pb"
 	"github.com/Dcarbon/go-shared/dmodels"
@@ -332,23 +333,27 @@ func (sv *Service) SetVersion(ctx context.Context, req *pb.RIotSetVersion,
 	return &pb.Empty{}, nil
 }
 
-func (sv *Service) GetVersion(ctx context.Context, req *pb.RIotGetVersion,
-) (*pb.RsIotVersion, error) {
+func (sv *Service) GetVersion(ctx context.Context, req *pb.RIotGetVersion) (*pb.RsIotVersion, error) {
 	version, path, err := sv.iversion.GetVersion(&domain.RVersionGet{
 		IotType: req.IotType,
 		Version: &req.Version,
 	})
-	var Host = utils.StringEnv("S3_BUCKET_URL", "localhost")
-
-	p, _ := peer.FromContext(ctx)
-	fmt.Println("IP Called: " + p.Addr.String())
-
-	if nil != err {
+	if err != nil {
 		return nil, err
+	}
+	host := utils.StringEnv("S3_BUCKET_URL", "localhost")
+	if p, ok := peer.FromContext(ctx); ok {
+		fmt.Printf("IP Called: %s\n", p.Addr.String())
+	}
+	if strings.HasPrefix(path, "/") {
+		return &pb.RsIotVersion{
+			Version: version,
+			Path:    path,
+		}, nil
 	}
 	return &pb.RsIotVersion{
 		Version: version,
-		Path:    Host + "/" + path,
+		Path:    fmt.Sprintf("%s/%s", host, path),
 	}, nil
 }
 
