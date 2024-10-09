@@ -290,12 +290,16 @@ func (ip *MintImpl) MintedOffset(input domain.RIotOffset) (*domain.RsIotOffset, 
 	for _, iot := range *iots {
 		input.IotIds = append(input.IotIds, iot.Id)
 	}
+	// Subquery to get the max nonce for each iot_id
+	maxNonceSubquery := ip.tblSign().
+		Select("iot_id, MAX(nonce) as max_nonce").
+		Where("iot_id IN ?", input.IotIds).
+		Group("iot_id")
+
 	result := domain.RsIotOffset{}
-	var query = ip.tblSign().Select("sum((substring(amount from 2))::bit(34)::bigint / 1e9 ) AS amount")
-	if len(input.IotIds) > 0 {
-		query.Where("iot_id IN ?", input.IotIds)
-	}
-	if err := query.Find(&result).Error; err != nil {
+	var query = ip.tblSign().Select("SUM(CAST(amount as float)) / 1e9 as amount").
+		Joins("JOIN (?) as max_n ON mint_sign.iot_id = max_n.iot_id AND mint_sign.nonce = max_n.max_nonce", maxNonceSubquery)
+	if err := query.Scan(&result).Error; err != nil {
 		return nil, dmodels.ParsePostgresError("Query minted offset fail,err: ", err)
 	}
 	return &result, nil

@@ -358,7 +358,6 @@ func (sv *Service) GetVersion(ctx context.Context, req *pb.RIotGetVersion) (*pb.
 }
 
 func (sv *Service) Offset(ctx context.Context, req *pb.RIotOffset) (*pb.RsIotOffset, error) {
-
 	res, err := sv.iminter.MintedOffset(domain.RIotOffset{})
 	if nil != err {
 		return nil, err
