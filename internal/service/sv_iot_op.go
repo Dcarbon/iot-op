@@ -294,12 +294,26 @@ func (sv *Service) GetState(ctx context.Context, req *pb.IdInt64,
 		Info:       state.Info,
 		Additional: b,
 	}
+
 	for i, it := range state.Sensors {
 		rs.Sensors[i] = &pb.SensorState{
 			State:  int32(it.State),
 			Metric: it.Metric,
 			Type:   int32(it.Type),
 		}
+	}
+
+	if len(state.Sensors) > 0 {
+		rs.IsActive = true
+		rs.RemainTime = rs.Sensors[0].Metric["runtime"]
+	}
+
+	if rs.RemainTime == 0 {
+		data, err := sv.iot.GetById(req.Id)
+		if err != nil {
+			fmt.Printf("Error : %s\n", err)
+		}
+		rs.RemainTime = float64(data.TimeRemain)
 	}
 	return rs, nil
 }
@@ -345,12 +359,27 @@ func (sv *Service) GetVersion(ctx context.Context, req *pb.RIotGetVersion) (*pb.
 	if p, ok := peer.FromContext(ctx); ok {
 		fmt.Printf("IP Called: %s\n", p.Addr.String())
 	}
+	if strings.HasPrefix(path, "/") && version == "0.0.3" && req.IotType == 20 {
+		return &pb.RsIotVersion{
+			Version: version,
+			Path:    fmt.Sprintf("%s%s", "https://dcarbon.org", path),
+		}, nil
+	}
+
+	if strings.HasPrefix(path, "/") && version == "0.0.7" && req.IotType == 21 {
+		return &pb.RsIotVersion{
+			Version: version,
+			Path:    fmt.Sprintf("%s%s", "https://dcarbon.org", path),
+		}, nil
+	}
+
 	if strings.HasPrefix(path, "/") {
 		return &pb.RsIotVersion{
 			Version: version,
 			Path:    path,
 		}, nil
 	}
+
 	return &pb.RsIotVersion{
 		Version: version,
 		Path:    fmt.Sprintf("%s/%s", host, path),

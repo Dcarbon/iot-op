@@ -57,14 +57,12 @@ func (impl *StateImpl) Update(req *domain.RStateUpdate,
 	if nil != err {
 		return err
 	}
-
 	_, err = impl.rClient.Set(
 		context.TODO(), getKey(iot.Id), stateRaw, stateDuration,
 	).Result()
 	if nil != err {
 		return err
 	}
-	// log.Println("Ok ? ", ok)
 	go func() {
 		log.Println("Publish notification maintainance.")
 		if len(state.Sensors) <= 0 {
@@ -74,11 +72,19 @@ func (impl *StateImpl) Update(req *domain.RStateUpdate,
 		if runtime == 0 {
 			return
 		}
+		if err := impl.iot.UpdateRemainTime(svc.RemainTime{
+			Id:         iot.Id,
+			RemainTime: int64(runtime),
+		}); err != nil {
+			log.Println("Insert RemainTime fail: ", err)
+		}
+
+		//TODO: set event
 		// if runtime == 500 {
+		// 	impl.pusher.PushNotification(&edef.EventPushNotification{
+		// 		ProfileId: "77670e7e-3639-4411-9262-de297d984703",
+		// 	})
 		// }
-		impl.pusher.PushNotification(&edef.EventPushNotification{
-			ProfileId: "77670e7e-3639-4411-9262-de297d984703",
-		})
 
 	}()
 
