@@ -15,7 +15,7 @@ import (
 
 var config = gutils.Config{
 	Port:   utils.IntEnv("PORT", 4003),
-	DbUrl:  utils.StringEnv("DB_URL", "postgres://admin:hellosecret@13.228.11.143/iot_op"),
+	DbUrl:  utils.StringEnv("DB_URL", "postgres://admin:hellosecret@54.151.254.13/iot_op"),
 	Name:   "IotOperator", // Sensor service
 	JwtKey: utils.StringEnv("JWT", ""),
 	Options: map[string]string{

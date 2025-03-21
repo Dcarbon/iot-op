@@ -81,7 +81,7 @@ func NewService(config *gutils.Config) (*Service, error) {
 		return nil, err
 	}
 
-	client := client.NewClient(utils.StringEnv("RPC_URL", "https://devnet.helius-rpc.com/?api-key=8f88217f-c97b-4309-a38a-f5935725082e"))
+	client := client.NewClient(utils.StringEnv("RPC_URL", "https://devnet.helius-rpc.com/?api-key=1b963193-9846-4862-afaf-2db4a05e97c2"))
 
 	sv := &Service{
 		iot:     iot,
